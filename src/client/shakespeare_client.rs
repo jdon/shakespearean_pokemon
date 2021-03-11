@@ -92,7 +92,7 @@ impl ShakespeareClient {
 mod tests {
     use super::*;
     use serde_json::json;
-    use wiremock::matchers::{body_json, method, path};
+    use wiremock::matchers::{body_json, header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -170,6 +170,42 @@ mod tests {
             .await;
 
         let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+        let response = client
+            .get_translation_response("Hello world")
+            .await
+            .unwrap();
+        assert_eq!(response, expected_body);
+    }
+
+    #[tokio::test]
+    async fn it_successfully_sends_an_api_key() {
+        let api_token = "an_api_token";
+
+        let expected_text = TextInput {
+            text: "Hello world".into(),
+        };
+
+        let expected_body = ShakespeareResponse {
+            success: ShakespeareSuccess { total: 1 },
+            contents: ShakespeareTextContents {
+                translated: "world hello".into(),
+                text: "hello world".into(),
+                translation: "shakespeare".into(),
+            },
+        };
+
+        let mock_response = ResponseTemplate::new(200).set_body_json(json!(expected_body));
+
+        let mock_server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(body_json(expected_text))
+            .and(header(API_TOKEN_KEY, api_token))
+            .respond_with(mock_response)
+            .mount(&mock_server)
+            .await;
+
+        let client =
+            ShakespeareClient::new_with_base_url(mock_server.uri(), Some(api_token.into()));
         let response = client
             .get_translation_response("Hello world")
             .await
