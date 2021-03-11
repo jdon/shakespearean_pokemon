@@ -25,7 +25,12 @@ pub struct PokemonClient {
 }
 
 impl PokemonClient {
-    pub fn new(base_url: String) -> Self {
+    pub fn new() -> Self {
+        Self {
+            base_url: "https://pokeapi.co/api/v2/".into(),
+        }
+    }
+    pub fn new_with_base_url(base_url: String) -> Self {
         Self { base_url }
     }
     pub async fn get_pokemon(&self, pokemon: &str) -> std::result::Result<Pokemon, ClientError> {
@@ -35,7 +40,7 @@ impl PokemonClient {
             .await
             .map_err(|_| ClientError::PokemonAPIError)?;
 
-        return match res.status() {
+        match res.status() {
             StatusCode::Ok => {
                 let data: Pokemon = res
                     .body_json()
@@ -45,7 +50,7 @@ impl PokemonClient {
             }
             StatusCode::NotFound => Err(ClientError::PokemonNotFoundError),
             _ => Err(ClientError::PokemonAPIError),
-        };
+        }
     }
 }
 
@@ -65,7 +70,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let pokemon_client = PokemonClient::new(mock_server.uri());
+        let pokemon_client = PokemonClient::new_with_base_url(mock_server.uri());
         let res = pokemon_client.get_pokemon("charizard").await;
 
         if let Err(err) = res {
@@ -84,7 +89,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let pokemon_client = PokemonClient::new(mock_server.uri());
+        let pokemon_client = PokemonClient::new_with_base_url(mock_server.uri());
         let res = pokemon_client.get_pokemon("charizard").await;
 
         if let Err(err) = res {
@@ -117,7 +122,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let pokemon_client = PokemonClient::new(mock_server.uri());
+        let pokemon_client = PokemonClient::new_with_base_url(mock_server.uri());
 
         let res = pokemon_client.get_pokemon("charizard").await.unwrap();
 
