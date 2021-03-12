@@ -31,7 +31,7 @@ cargo build
 ```
 #### Test
 ```
-cargo test
+cargo test -- --test-threads 1
 ```
 #### Run
 Relies on a `port` environment variable:
@@ -66,3 +66,5 @@ The docker container is also built and hosted on github, so if you don't want to
 2. Project layout
    
    Currently this is being built as 1 binary and is tightly coupled. I could turn this into a cargo workspace and split the api clients into library crates, so they can be reused elsewhere.
+3. Tests
+   Tests are relying on environment variables, so I'm using `cargo test -- --test-threads 1` in order to stop tests multiple tests from mutating them. If I had more time I would refactor my tests to not rely on changing environment variables.
