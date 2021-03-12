@@ -165,7 +165,7 @@ mod tests {
         assert_eq!(res.body(), "{\"name\":\"charizard\",\"description\":\"Spits fire yond is hot enow to melt boulders. Known to cause forest fires unintentionally.\"}");
     }
 
-	#[tokio::test]
+    #[tokio::test]
     async fn it_returns_404_on_invalid_pokemon() {
         // arrange
         let mock_server = MockServer::start().await;
@@ -192,19 +192,19 @@ mod tests {
         assert_eq!(res.body(), "{\"error\":\"Failed to find pokemon\"}");
     }
 
-	#[tokio::test]
+    #[tokio::test]
     async fn it_returns_429_on_too_many_shakespeare_requests() {
-       // arrange
-	   let mock_server = MockServer::start().await;
-	   env::set_var("port", "5000");
-	   env::set_var("pokemon_api_base_url", mock_server.uri());
-	   env::set_var("shakespeare_api_base_url", mock_server.uri());
+        // arrange
+        let mock_server = MockServer::start().await;
+        env::set_var("port", "5000");
+        env::set_var("pokemon_api_base_url", mock_server.uri());
+        env::set_var("shakespeare_api_base_url", mock_server.uri());
 
-	   let expected_text = TextInput {
+        let expected_text = TextInput {
 		   text: "Spits fire that is hot enough to melt boulders. Known to cause forest fires unintentionally.".into(),
 	   };
 
-	   let generated_pokemon = Pokemon {
+        let generated_pokemon = Pokemon {
 		   id: 6,
 		   name: "charizard".into(),
 		   flavor_text_entries: vec![FlavorTextEntry {
@@ -216,31 +216,31 @@ mod tests {
 		   }],
 	   };
 
-	   let mock_pokemon_response =
-		   ResponseTemplate::new(200).set_body_json(json!(generated_pokemon));
+        let mock_pokemon_response =
+            ResponseTemplate::new(200).set_body_json(json!(generated_pokemon));
 
-	   Mock::given(method("POST"))
-		   .and(body_json(expected_text))
-		   .respond_with(ResponseTemplate::new(429))
-		   .mount(&mock_server)
-		   .await;
+        Mock::given(method("POST"))
+            .and(body_json(expected_text))
+            .respond_with(ResponseTemplate::new(429))
+            .mount(&mock_server)
+            .await;
 
-	   Mock::given(method("GET"))
-		   .and(path("/api/v2/pokemon-species/charizard"))
-		   .respond_with(mock_pokemon_response)
-		   .mount(&mock_server)
-		   .await;
+        Mock::given(method("GET"))
+            .and(path("/api/v2/pokemon-species/charizard"))
+            .respond_with(mock_pokemon_response)
+            .mount(&mock_server)
+            .await;
 
-	   // acct
-	   let filter = pokemon_filter();
-	   let res = warp::test::request()
-		   .method("GET")
-		   .path("/pokemon/charizard")
-		   .reply(&filter)
-		   .await;
+        // acct
+        let filter = pokemon_filter();
+        let res = warp::test::request()
+            .method("GET")
+            .path("/pokemon/charizard")
+            .reply(&filter)
+            .await;
 
-	   // assert
-	   assert_eq!(res.status(), 429);
-	   assert_eq!(res.body(), "{\"error\":\"Too many requests\"}");
+        // assert
+        assert_eq!(res.status(), 429);
+        assert_eq!(res.body(), "{\"error\":\"Too many requests\"}");
     }
 }
