@@ -12,14 +12,15 @@ pub fn pokemon_filter() -> impl Filter<Extract = impl warp::Reply, Error = warp:
         .and(warp::get())
         .and_then(get_pokemon)
 }
+
 #[derive(Serialize, Deserialize)]
-pub struct GetPokemonOutput {
+struct GetPokemonOutput {
     name: String,
     description: String,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct GetPokemonErrorOutput {
+struct GetPokemonErrorOutput {
     error: String,
 }
 
