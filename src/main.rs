@@ -41,6 +41,7 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
+    println!("Starting server on port {}", CONFIG.port);
     warp::serve(routes::pokemon::pokemon_filter())
         .run(([0, 0, 0, 0], CONFIG.port))
         .await;
