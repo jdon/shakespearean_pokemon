@@ -5,11 +5,14 @@ authors = ["Jonathan Donaldson <jdonaldson278@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+lazy_static = "1.4.0"
 thiserror = "1.0"
 serde = {version ="1.0.124", features=["serde_derive"]}
 surf = "2.1.0"
 tokio = {version = "1.2.0", features =["full"]}
 serde_json = "1.0.64"
+warp = "0.3.0"
+envy = "0.4.2"
 
 
 [dev-dependencies]

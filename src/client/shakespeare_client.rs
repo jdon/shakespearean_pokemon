@@ -5,8 +5,8 @@ use surf::StatusCode;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ShakespeareResponse {
-    success: ShakespeareSuccess,
-    contents: ShakespeareTextContents,
+    pub success: ShakespeareSuccess,
+    pub contents: ShakespeareTextContents,
 }
 
 impl ShakespeareResponse {
@@ -20,14 +20,14 @@ impl ShakespeareResponse {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ShakespeareTextContents {
-    translated: String,
-    text: String,
-    translation: String,
+    pub translated: String,
+    pub text: String,
+    pub translation: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ShakespeareSuccess {
-    total: i64,
+    pub total: i64,
 }
 
 pub struct ShakespeareClient {
@@ -36,9 +36,10 @@ pub struct ShakespeareClient {
 }
 
 const API_TOKEN_KEY: &'static str = "X-Funtranslations-Api-Secret";
-const BASE_URL: &'static str = "https://api.funtranslations.com/translate/shakespeare.json";
+pub const BASE_URL: &'static str = "https://api.funtranslations.com/translate/shakespeare.json";
 
 impl ShakespeareClient {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             base_url: BASE_URL.into(),
@@ -92,7 +93,7 @@ impl ShakespeareClient {
 mod tests {
     use super::*;
     use serde_json::json;
-    use wiremock::matchers::{body_json, header, method, path};
+    use wiremock::matchers::{body_json, header, method};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     #[derive(Serialize, Deserialize, Debug, PartialEq)]

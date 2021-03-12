@@ -14,10 +14,19 @@ pub struct FlavorTextEntry {
     pub flavor_text: String,
     pub language: Language,
 }
+
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct Language {
-    name: String,
-    url: String,
+    pub name: String,
+    pub url: String,
+}
+
+pub fn get_description(text: &Vec<FlavorTextEntry>) -> Option<String> {
+    let ds = text.iter().find(|entry| entry.language.name == "en");
+    match ds {
+        Some(entry) => Some(entry.flavor_text.replace("\n", " ").replace("\u{c}", "")),
+        None => None,
+    }
 }
 
 pub struct PokemonClient {
@@ -27,9 +36,11 @@ pub struct PokemonClient {
 impl PokemonClient {
     pub fn new() -> Self {
         Self {
-            base_url: "https://pokeapi.co/api/v2/".into(),
+            base_url: "https://pokeapi.co".into(),
         }
     }
+
+    #[allow(dead_code)] // Not used as part of the client, but used in tests
     pub fn new_with_base_url(base_url: String) -> Self {
         Self { base_url }
     }
