@@ -102,6 +102,7 @@ mod tests {
     }
     #[tokio::test]
     async fn it_returns_an_api_error_on_500_response() {
+        // arrange
         let expected_text = TextInput {
             text: "Hello world".into(),
         };
@@ -114,8 +115,11 @@ mod tests {
             .await;
 
         let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+
+        // act
         let response = client.get_translation_response("Hello world").await;
 
+        // assert
         if let Err(err) = response {
             assert_eq!(err, ClientError::ShakespeareAPIError);
         } else {
@@ -125,6 +129,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_errors_on_invalid_data() {
+        // arrange
         let expected_text = TextInput {
             text: "Hello world".into(),
         };
@@ -137,8 +142,11 @@ mod tests {
             .await;
 
         let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+
+        // act
         let response = client.get_translation_response("Hello world").await;
 
+        // assert
         if let Err(err) = response {
             assert_eq!(err, ClientError::ShakespeareDeserializationError);
         } else {
@@ -148,6 +156,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_successfully_deserializes_a_response() {
+        // arrange
         let expected_text = TextInput {
             text: "Hello world".into(),
         };
@@ -160,7 +169,6 @@ mod tests {
                 translation: "shakespeare".into(),
             },
         };
-
         let mock_response = ResponseTemplate::new(200).set_body_json(json!(expected_body));
 
         let mock_server = MockServer::start().await;
@@ -171,17 +179,21 @@ mod tests {
             .await;
 
         let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+
+        // act
         let response = client
             .get_translation_response("Hello world")
             .await
             .unwrap();
+
+        // assert
         assert_eq!(response, expected_body);
     }
 
     #[tokio::test]
     async fn it_successfully_sends_an_api_key() {
+        // arrange
         let api_token = "an_api_token";
-
         let expected_text = TextInput {
             text: "Hello world".into(),
         };
@@ -196,7 +208,6 @@ mod tests {
         };
 
         let mock_response = ResponseTemplate::new(200).set_body_json(json!(expected_body));
-
         let mock_server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(body_json(expected_text))
@@ -207,15 +218,20 @@ mod tests {
 
         let client =
             ShakespeareClient::new_with_base_url(mock_server.uri(), Some(api_token.into()));
+
+        // act
         let response = client
             .get_translation_response("Hello world")
             .await
             .unwrap();
+
+        // assert
         assert_eq!(response, expected_body);
     }
 
     #[tokio::test]
     async fn it_successfully_gets_translation() {
+        // arrange
         let expected_text = TextInput {
             text: "Hello world".into(),
         };
@@ -228,7 +244,6 @@ mod tests {
                 translation: "shakespeare".into(),
             },
         };
-
         let mock_response = ResponseTemplate::new(200).set_body_json(json!(expected_body));
 
         let mock_server = MockServer::start().await;
@@ -239,7 +254,11 @@ mod tests {
             .await;
 
         let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+
+        //act
         let response = client.get_translation("Hello world").await.unwrap();
+
+        // assert
         assert_eq!(response, "world hello");
     }
 }

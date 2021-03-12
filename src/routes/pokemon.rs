@@ -152,7 +152,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        // acct
+        // act
         let filter = pokemon_filter();
         let res = warp::test::request()
             .method("GET")
@@ -179,7 +179,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        // acct
+        // act
         let filter = pokemon_filter();
         let res = warp::test::request()
             .method("GET")
@@ -231,7 +231,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        // acct
+        // act
         let filter = pokemon_filter();
         let res = warp::test::request()
             .method("GET")

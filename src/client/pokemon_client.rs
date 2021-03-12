@@ -74,6 +74,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_error_on_404() {
+        // arrange
         let mock_server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/api/v2/pokemon-species/charizard"))
@@ -82,8 +83,11 @@ mod tests {
             .await;
 
         let pokemon_client = PokemonClient::new_with_base_url(mock_server.uri());
+
+        // act
         let res = pokemon_client.get_pokemon("charizard").await;
 
+        // assert
         if let Err(err) = res {
             assert_eq!(err, ClientError::PokemonNotFoundError);
         } else {
@@ -93,6 +97,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_errors_on_invalid_data() {
+        // arrange
         let mock_server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/api/v2/pokemon-species/charizard"))
@@ -101,8 +106,11 @@ mod tests {
             .await;
 
         let pokemon_client = PokemonClient::new_with_base_url(mock_server.uri());
+
+        // act
         let res = pokemon_client.get_pokemon("charizard").await;
 
+        // assert
         if let Err(err) = res {
             assert_eq!(err, ClientError::PokemonDeserializationError);
         } else {
@@ -112,6 +120,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_correctly_deserializes_pokemon_species() {
+        // arrange
         let mock_server = MockServer::start().await;
 
         let generated_pokemon = Pokemon {
@@ -135,8 +144,10 @@ mod tests {
 
         let pokemon_client = PokemonClient::new_with_base_url(mock_server.uri());
 
+        // act
         let res = pokemon_client.get_pokemon("charizard").await.unwrap();
 
+        // assert
         assert_eq!(res, generated_pokemon);
     }
 }
