@@ -61,7 +61,7 @@ The docker container is also built and hosted on github, so if you don't want to
 1. Error Handling and logging
    
    Currently I'm not capturing any additional context when returning an error.
-   My errors could be more generic and I could add logging when an error happens
+   My errors could be more specific and I could add logging when an error happens.
 
 2. Project layout
    
