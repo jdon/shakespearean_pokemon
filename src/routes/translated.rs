@@ -28,8 +28,9 @@ pub async fn get(
 
             let description = match pokemon.get_description() {
                 Some(desc) => {
-                    let translation_response =
-                        translation_client.get_translation(&desc, translation_type).await;
+                    let translation_response = translation_client
+                        .get_translation(&desc, translation_type)
+                        .await;
                     match translation_response {
                         Ok(translated_text) => Some(translated_text),
                         Err(_) => Some(desc), // Swallowing error as task says to use standard description if we fail to translate
