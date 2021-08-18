@@ -1,91 +1,108 @@
 use super::client_error::ClientError;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use surf::StatusCode;
+use surf::{Client, StatusCode};
+
+const API_TOKEN_KEY: &str = "X-Funtranslations-Api-Secret";
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct ShakespeareResponse {
-    pub success: ShakespeareSuccess,
-    pub contents: ShakespeareTextContents,
+pub struct TranslationResponse {
+    pub success: TranslationSuccess,
+    pub contents: TranslationTextContents,
 }
 
-impl ShakespeareResponse {
+impl TranslationResponse {
     pub fn get_translation(&self) -> std::result::Result<String, ClientError> {
         match self.success.total {
             1 => Ok(self.contents.translated.clone()),
-            _ => Err(ClientError::ShakespeareAPIError),
+            _ => Err(ClientError::TranslationAPIError),
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct ShakespeareTextContents {
+pub struct TranslationTextContents {
     pub translated: String,
     pub text: String,
     pub translation: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct ShakespeareSuccess {
+pub struct TranslationSuccess {
     pub total: i64,
 }
 
-pub struct ShakespeareClient {
-    base_url: String,
-    api_token: Option<String>,
+pub enum TranslationType {
+    YODA,
+    SHAKESPEARE,
 }
 
-const API_TOKEN_KEY: &'static str = "X-Funtranslations-Api-Secret";
-pub const BASE_URL: &'static str = "https://api.funtranslations.com/translate/shakespeare.json";
-
-impl ShakespeareClient {
-    #[allow(dead_code)]
-    pub fn new() -> Self {
-        Self {
-            base_url: BASE_URL.into(),
-            api_token: None,
+impl TranslationType {
+    fn as_url(&self) -> &'static str {
+        match self {
+            TranslationType::YODA => "translate/yoda.json",
+            TranslationType::SHAKESPEARE => "translate/shakespeare.json",
         }
     }
+}
 
-    pub fn new_with_base_url(base_url: String, api_token: Option<String>) -> Self {
+#[derive(Clone)]
+pub struct TranslationClient {
+    base_url: String,
+    api_token: Option<String>,
+    client: Client, // Surfs clone implementation shares the underlying HttpClient
+}
+
+impl TranslationClient {
+    pub fn new(base_url: String, api_token: Option<String>) -> Self {
         Self {
             base_url,
             api_token,
+            client: Client::new(),
         }
     }
 
-    pub async fn get_translation_response(
+    async fn get_translation_response(
         &self,
         text: &str,
-    ) -> std::result::Result<ShakespeareResponse, ClientError> {
+        translation_type: TranslationType,
+    ) -> std::result::Result<TranslationResponse, ClientError> {
         let request_body = json!({ "text": text });
 
-        let mut request = surf::post(&self.base_url).body(request_body).build();
+        let url = format!("{}/{}", self.base_url, translation_type.as_url());
+
+        let mut request = surf::post(url).body(request_body).build();
         if let Some(token) = &self.api_token {
-            request.insert_header(API_TOKEN_KEY, token);
+            request.insert_header(API_TOKEN_KEY, token.as_str());
         }
 
         let mut response = surf::client()
             .send(request)
             .await
-            .map_err(|_| ClientError::ShakespeareAPIError)?;
+            .map_err(|_| ClientError::TranslationAPIError)?;
 
         match response.status() {
             StatusCode::Ok => {
-                let data: ShakespeareResponse = response
+                let data: TranslationResponse = response
                     .body_json()
                     .await
-                    .map_err(|_| ClientError::ShakespeareDeserializationError)?;
+                    .map_err(|_| ClientError::TranslationDeserializationError)?;
                 Ok(data)
             }
-            StatusCode::TooManyRequests => Err(ClientError::ShakespeareTooManyRequestsError),
-            _ => Err(ClientError::ShakespeareAPIError),
+            StatusCode::TooManyRequests => Err(ClientError::TranslationTooManyRequestsError),
+            _ => Err(ClientError::TranslationAPIError),
         }
     }
 
-    pub async fn get_translation(&self, text: &str) -> std::result::Result<String, ClientError> {
-        let response = self.get_translation_response(text).await?;
-        return response.get_translation();
+    pub async fn get_translation(
+        &self,
+        text: &str,
+        translation_type: TranslationType,
+    ) -> std::result::Result<String, ClientError> {
+        let response = self
+            .get_translation_response(text, translation_type)
+            .await?;
+        response.get_translation()
     }
 }
 
@@ -93,7 +110,7 @@ impl ShakespeareClient {
 mod tests {
     use super::*;
     use serde_json::json;
-    use wiremock::matchers::{body_json, header, method};
+    use wiremock::matchers::{body_json, header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -110,20 +127,23 @@ mod tests {
         let mock_server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(body_json(expected_text))
+            .and(path("translate/yoda.json"))
             .respond_with(ResponseTemplate::new(500))
             .mount(&mock_server)
             .await;
 
-        let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+        let client = TranslationClient::new(mock_server.uri(), None);
 
         // act
-        let response = client.get_translation_response("Hello world").await;
+        let response = client
+            .get_translation("Hello world", TranslationType::YODA)
+            .await;
 
         // assert
         if let Err(err) = response {
-            assert_eq!(err, ClientError::ShakespeareAPIError);
+            assert_eq!(err, ClientError::TranslationAPIError);
         } else {
-            assert!(false);
+            unreachable!();
         }
     }
 
@@ -137,20 +157,23 @@ mod tests {
         let mock_server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(body_json(expected_text))
+            .and(path("translate/yoda.json"))
             .respond_with(ResponseTemplate::new(200))
             .mount(&mock_server)
             .await;
 
-        let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+        let client = TranslationClient::new(mock_server.uri(), None);
 
         // act
-        let response = client.get_translation_response("Hello world").await;
+        let response = client
+            .get_translation("Hello world", TranslationType::YODA)
+            .await;
 
         // assert
         if let Err(err) = response {
-            assert_eq!(err, ClientError::ShakespeareDeserializationError);
+            assert_eq!(err, ClientError::TranslationDeserializationError);
         } else {
-            assert!(false);
+            unreachable!();
         }
     }
 
@@ -161,9 +184,9 @@ mod tests {
             text: "Hello world".into(),
         };
 
-        let expected_body = ShakespeareResponse {
-            success: ShakespeareSuccess { total: 1 },
-            contents: ShakespeareTextContents {
+        let expected_body = TranslationResponse {
+            success: TranslationSuccess { total: 1 },
+            contents: TranslationTextContents {
                 translated: "world hello".into(),
                 text: "hello world".into(),
                 translation: "shakespeare".into(),
@@ -174,15 +197,16 @@ mod tests {
         let mock_server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(body_json(expected_text))
+            .and(path("translate/shakespeare.json"))
             .respond_with(mock_response)
             .mount(&mock_server)
             .await;
 
-        let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+        let client = TranslationClient::new(mock_server.uri(), None);
 
         // act
         let response = client
-            .get_translation_response("Hello world")
+            .get_translation_response("Hello world", TranslationType::SHAKESPEARE)
             .await
             .unwrap();
 
@@ -193,14 +217,14 @@ mod tests {
     #[tokio::test]
     async fn it_successfully_sends_an_api_key() {
         // arrange
-        let api_token = "an_api_token";
+        let api_token = String::from("an_api_token");
         let expected_text = TextInput {
             text: "Hello world".into(),
         };
 
-        let expected_body = ShakespeareResponse {
-            success: ShakespeareSuccess { total: 1 },
-            contents: ShakespeareTextContents {
+        let expected_body = TranslationResponse {
+            success: TranslationSuccess { total: 1 },
+            contents: TranslationTextContents {
                 translated: "world hello".into(),
                 text: "hello world".into(),
                 translation: "shakespeare".into(),
@@ -211,17 +235,17 @@ mod tests {
         let mock_server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(body_json(expected_text))
-            .and(header(API_TOKEN_KEY, api_token))
+            .and(path("translate/shakespeare.json"))
+            .and(header(API_TOKEN_KEY, api_token.as_str()))
             .respond_with(mock_response)
             .mount(&mock_server)
             .await;
 
-        let client =
-            ShakespeareClient::new_with_base_url(mock_server.uri(), Some(api_token.into()));
+        let client = TranslationClient::new(mock_server.uri(), Some(api_token));
 
         // act
         let response = client
-            .get_translation_response("Hello world")
+            .get_translation_response("Hello world", TranslationType::SHAKESPEARE)
             .await
             .unwrap();
 
@@ -236,9 +260,9 @@ mod tests {
             text: "Hello world".into(),
         };
 
-        let expected_body = ShakespeareResponse {
-            success: ShakespeareSuccess { total: 1 },
-            contents: ShakespeareTextContents {
+        let expected_body = TranslationResponse {
+            success: TranslationSuccess { total: 1 },
+            contents: TranslationTextContents {
                 translated: "world hello".into(),
                 text: "hello world".into(),
                 translation: "shakespeare".into(),
@@ -249,14 +273,18 @@ mod tests {
         let mock_server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(body_json(expected_text))
+            .and(path("translate/yoda.json"))
             .respond_with(mock_response)
             .mount(&mock_server)
             .await;
 
-        let client = ShakespeareClient::new_with_base_url(mock_server.uri(), None);
+        let client = TranslationClient::new(mock_server.uri(), None);
 
         //act
-        let response = client.get_translation("Hello world").await.unwrap();
+        let response = client
+            .get_translation("Hello world", TranslationType::YODA)
+            .await
+            .unwrap();
 
         // assert
         assert_eq!(response, "world hello");

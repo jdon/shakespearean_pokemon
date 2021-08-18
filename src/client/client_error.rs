@@ -8,9 +8,9 @@ pub enum ClientError {
     #[error("Failed to get pokemon")]
     PokemonAPIError,
     #[error("Failed to deserialize shakespeare data")]
-    ShakespeareDeserializationError,
+    TranslationDeserializationError,
     #[error("Failed to get shakespeare translation")]
-    ShakespeareAPIError,
+    TranslationAPIError,
     #[error("Failed to get shakespeare translation, too many requests")]
-    ShakespeareTooManyRequestsError,
+    TranslationTooManyRequestsError,
 }
