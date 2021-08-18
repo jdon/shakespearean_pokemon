@@ -16,7 +16,6 @@ COPY . .
 # Copy over the cached dependencies
 COPY --from=cacher /app/target target
 COPY --from=cacher /usr/local/cargo /usr/local/cargo
-ENV SQLX_OFFLINE=true
 RUN cargo build --release --bin shakespearean_pokemon
 
 FROM debian:buster-slim as runtime
