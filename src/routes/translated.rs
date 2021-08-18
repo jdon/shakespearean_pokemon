@@ -150,7 +150,7 @@ mod tests {
 
         // assert
         assert_eq!(res.status(), 200);
-        assert_eq!(res.body(), "{\"name\":\"charizard\",\"description\":\"Spits fire yond is hot enow to melt boulders. Known to cause forest fires unintentionally.\",\"is_legendary\":false,\"habitat\":\"urban\"}");
+        assert_eq!(res.body(), "{\"name\":\"charizard\",\"description\":\"Spits fire yond is hot enow to melt boulders. Known to cause forest fires unintentionally.\",\"isLegendary\":false,\"habitat\":\"urban\"}");
     }
 
     #[tokio::test]
@@ -219,7 +219,7 @@ mod tests {
 
         // assert
         assert_eq!(res.status(), 200);
-        assert_eq!(res.body(), "{\"name\":\"zubat\",\"description\":\"Forms colonies in perpetually dark places.And approach targets, uses ultrasonic waves to identify.\",\"is_legendary\":false,\"habitat\":\"cave\"}");
+        assert_eq!(res.body(), "{\"name\":\"zubat\",\"description\":\"Forms colonies in perpetually dark places.And approach targets, uses ultrasonic waves to identify.\",\"isLegendary\":false,\"habitat\":\"cave\"}");
     }
 
     #[tokio::test]
@@ -288,7 +288,7 @@ mod tests {
 
         // assert
         assert_eq!(res.status(), 200);
-        assert_eq!(res.body(), "{\"name\":\"zubat\",\"description\":\"Forms colonies in perpetually dark places.And approach targets, uses ultrasonic waves to identify.\",\"is_legendary\":true,\"habitat\":\"urban\"}");
+        assert_eq!(res.body(), "{\"name\":\"zubat\",\"description\":\"Forms colonies in perpetually dark places.And approach targets, uses ultrasonic waves to identify.\",\"isLegendary\":true,\"habitat\":\"urban\"}");
     }
 
     #[tokio::test]
@@ -372,6 +372,6 @@ mod tests {
 
         // assert
         assert_eq!(res.status(), 200);
-        assert_eq!(res.body(), "{\"name\":\"charizard\",\"description\":\"Spits fire that is hot enough to melt boulders. Known to cause forest fires unintentionally.\",\"is_legendary\":false,\"habitat\":\"urban\"}");
+        assert_eq!(res.body(), "{\"name\":\"charizard\",\"description\":\"Spits fire that is hot enough to melt boulders. Known to cause forest fires unintentionally.\",\"isLegendary\":false,\"habitat\":\"urban\"}");
     }
 }
