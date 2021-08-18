@@ -1,4 +1,4 @@
-pub mod client;
+mod client;
 mod routes;
 use client::{pokemon_client::PokemonClient, translation_client::TranslationClient};
 

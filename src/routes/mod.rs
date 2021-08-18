@@ -1,4 +1,4 @@
-pub mod pokemon;
+mod pokemon;
 mod translated;
 
 use warp::Filter;

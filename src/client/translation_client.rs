@@ -33,15 +33,15 @@ pub struct TranslationSuccess {
 }
 
 pub enum TranslationType {
-    YODA,
-    SHAKESPEARE,
+    Yoda,
+    Shakespeare,
 }
 
 impl TranslationType {
     fn as_url(&self) -> &'static str {
         match self {
-            TranslationType::YODA => "translate/yoda.json",
-            TranslationType::SHAKESPEARE => "translate/shakespeare.json",
+            TranslationType::Yoda => "translate/yoda.json",
+            TranslationType::Shakespeare => "translate/shakespeare.json",
         }
     }
 }
@@ -136,7 +136,7 @@ mod tests {
 
         // act
         let response = client
-            .get_translation("Hello world", TranslationType::YODA)
+            .get_translation("Hello world", TranslationType::Yoda)
             .await;
 
         // assert
@@ -166,7 +166,7 @@ mod tests {
 
         // act
         let response = client
-            .get_translation("Hello world", TranslationType::YODA)
+            .get_translation("Hello world", TranslationType::Yoda)
             .await;
 
         // assert
@@ -206,7 +206,7 @@ mod tests {
 
         // act
         let response = client
-            .get_translation_response("Hello world", TranslationType::SHAKESPEARE)
+            .get_translation_response("Hello world", TranslationType::Shakespeare)
             .await
             .unwrap();
 
@@ -245,7 +245,7 @@ mod tests {
 
         // act
         let response = client
-            .get_translation_response("Hello world", TranslationType::SHAKESPEARE)
+            .get_translation_response("Hello world", TranslationType::Shakespeare)
             .await
             .unwrap();
 
@@ -282,7 +282,7 @@ mod tests {
 
         //act
         let response = client
-            .get_translation("Hello world", TranslationType::YODA)
+            .get_translation("Hello world", TranslationType::Yoda)
             .await
             .unwrap();
 

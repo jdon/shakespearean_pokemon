@@ -21,9 +21,9 @@ pub async fn get(
     let response = pokemon_client.get_pokemon(&pokemon_name).await;
     match response {
         Ok(pokemon) => {
-            let mut translation_type = TranslationType::SHAKESPEARE;
+            let mut translation_type = TranslationType::Shakespeare;
             if pokemon.habitat.name == "cave" || pokemon.is_legendary {
-                translation_type = TranslationType::YODA;
+                translation_type = TranslationType::Yoda;
             }
 
             let description = match pokemon.get_description() {
