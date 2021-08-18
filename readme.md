@@ -51,7 +51,7 @@ cargo build
 cargo test
 ```
 #### Run
-Relies on a `port` environment variable:
+Relies on a `port` , `pokemon_api_base_url` and `translation_api_base_url` environment variable:
 ```
 port=5000 pokemon_api_base_url=https://pokeapi.co translation_api_base_url=https://api.funtranslations.com cargo run -- release
 ```
@@ -63,7 +63,7 @@ api_token: Option<String>
 pokemon_api_base_url: String
 translation_api_base_url: String
 ```
-If the optional one aren't specified then a default value will be used.
+If the optional ones aren't specified then a default value will be used.
 
 ### Docker
 This project can be ran in docker:
@@ -86,4 +86,4 @@ The docker container is also built and hosted on github, so if you don't want to
 
 3. Caching
 
-   There are less than a 1000 pokemon, so I we are going to get lots of calls for the same pokemon. The pokemon data and translation are unlikely to change, so we could cache them to reuse in subsequent requests.
+   There are less than a 1000 pokemon, so we are going to get lots of calls for the same pokemon. The pokemon data and translation are unlikely to change, so we could cache them all to reuse in subsequent requests.
