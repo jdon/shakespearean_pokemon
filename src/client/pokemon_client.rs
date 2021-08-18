@@ -40,7 +40,6 @@ pub struct Language {
 }
 
 #[derive(Clone)]
-
 pub struct PokemonClient {
     base_url: String,
     client: Client, // Surfs clone implementation shares the underlying HttpClient
