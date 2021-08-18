@@ -1,7 +1,6 @@
-## Shakespearean Pokemon
-An API server which takes in the name of a pokemon and returns the description in Shakespearean.
+## Pokedex API
 
-Uses [pokeapi](https://pokeapi.co/) and [funtranslations](https://funtranslations.com/api/shakespeare)
+Uses [pokeapi](https://pokeapi.co/) and [funtranslations](https://funtranslations.com)
 
 ### Endpoints:
 
@@ -41,7 +40,7 @@ Output:
 ### Build/Testing/Running
 Ensure you have working rust install. If you don't you can install it by following these [instructions](https://www.rust-lang.org/tools/install).
 
-This API has been built using rust 1.50.0 but is being tested in CI with a minimum rust version of 1.45.0.
+This API has been built using rust stable.
 
 #### Build
 ```
